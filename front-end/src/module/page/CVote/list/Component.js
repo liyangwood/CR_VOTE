@@ -100,6 +100,7 @@ export default class extends StandardPage {
 
     async componentDidMount(){
         super.componentDidMount();
+      
         if(this.props.isLogin){
             const list = await this.props.listData({});
       

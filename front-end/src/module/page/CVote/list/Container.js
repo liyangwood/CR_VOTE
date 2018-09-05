@@ -2,8 +2,9 @@ import { createContainer, api_request } from '@/util'
 import Component from './Component'
 
 export default createContainer(Component, (state) => {
+    console.log(state.user);
     return {
-        isLogin : state.user.isLogin
+        isLogin : state.user.is_login
     }
 }, ()=>{
     return {
