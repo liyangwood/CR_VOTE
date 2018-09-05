@@ -17,7 +17,7 @@ export default class extends StandardPage {
 
     ord_checkLogin(isLogin){
         if(isLogin){
-            this.props.history.replace('/cvote/create');
+            this.props.history.replace('/cvote/list');
         }
     }
 }

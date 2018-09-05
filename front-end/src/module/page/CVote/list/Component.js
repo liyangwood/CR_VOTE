@@ -99,20 +99,22 @@ export default class extends StandardPage {
     }
 
     async componentDidMount(){
+        super.componentDidMount();
         if(this.props.isLogin){
             const list = await this.props.listData({});
       
             this.setState({list});
         }
         else{
-            this.props.history.replace('/login');
+            // this.props.history.replace('/login');
         }
       
     }
 
     ord_checkLogin(isLogin){
-        // if(!isLogin){
-        //     this.props.history.replace('/login');
-        // }
+        console.log(isLogin)
+        if(!isLogin){
+            this.props.history.replace('/login');
+        }
     }
 }
