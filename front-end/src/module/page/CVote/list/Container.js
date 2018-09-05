@@ -2,7 +2,9 @@ import { createContainer, api_request } from '@/util'
 import Component from './Component'
 
 export default createContainer(Component, (state) => {
-    return {}
+    return {
+        isLogin : state.user.isLogin
+    }
 }, ()=>{
     return {
         async listData(param){

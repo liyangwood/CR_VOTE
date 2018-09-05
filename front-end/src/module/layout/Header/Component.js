@@ -94,10 +94,10 @@ export default class extends BaseComponent {
         const fullName = `${this.props.user.firstName} ${this.props.user.lastName}`;
         return (
             <Menu onClick={this.clickItem.bind(this)} className="help-menu">
-                <Menu.Item style={{borderBottom:'1px solid #ccc'}} key="no_click">
+                {this.props.isLogin && <Menu.Item style={{borderBottom:'1px solid #ccc'}} key="no_click">
                     {fullName}
-                </Menu.Item>
-                <hr />
+                </Menu.Item>}
+                
                 <Menu.Item key="help">
                     {I18N.get('0007')}
                 </Menu.Item>

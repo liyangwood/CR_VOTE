@@ -28,7 +28,9 @@ export default class extends StandardPage {
     }
 
     ord_checkLogin(isLogin){
-        
+        if(!isLogin){
+            this.props.history.replace('/login');
+        }
     }
     async componentDidMount(){
   

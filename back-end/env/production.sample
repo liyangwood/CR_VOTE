@@ -2,4 +2,21 @@
 SERVER_PORT=3000
 
 # DB
-DB_URL=mongodb://127.0.0.1:27017/EBP
+DB_URL=mongodb://cvote-mongo:27017/EBP
+
+# APP
+APP_SECRET=elastos
+
+# AWS
+AWS_ACCESS_KEY=AKIAJEJJHKTBKA27M4HQ
+AWS_ACCESS_SECRET=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
+S3_REGION=us-west-1
+S3_BUCKET=ebp-dev-files
+
+# ADMIN_USER
+ADMIN_USERNAME=admin@ebp.com
+ADMIN_PASSWORD=Fby2FuPdSPySV8vg
+ADMIN_EMAIL=admin@ebp.com
+
+
+

@@ -15,7 +15,8 @@ const resolve = util.resolve;
 const prodEnv = {
     NODE_ENV: JSON.stringify('production'),
     PLATFORM_ENV: JSON.stringify('web'),
-    SERVER_URL: JSON.stringify('https://ebp-api-beta.elastos.org'),
+    SERVER_URL: JSON.stringify('http://192.144.145.63:3000'),
+    // SERVER_URL: JSON.stringify('http://127.0.0.1:3000'),
     CR_VERSION: JSON.stringify(process.env.CR_VERSION),
     GA_ID: JSON.stringify(process.env.GA_ID),
     GOOGLE_MAPS_API_KEY: JSON.stringify(process.env.GOOGLE_MAPS_API_KEY)
