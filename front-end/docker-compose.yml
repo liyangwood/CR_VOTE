@@ -4,7 +4,7 @@ services:
     container_name: cvote-frontend
     image: nginx:alpine
     ports:
-      - 3001:80
+      - 80:80
 #    build: .
 
     volumes:
