@@ -16,11 +16,16 @@ class C extends BaseComponent {
         super(props)
 
         this.state = {
-            persist: true
+            persist: true,
+            loading : false
         }
 
         this.isLogin = this.props.isLogin;
         this.user = this.props.user;
+    }
+
+    ord_loading(f=false){
+        this.setState({loading : f});
     }
 
     async handleSubmit(e) {
@@ -51,19 +56,32 @@ class C extends BaseComponent {
                 param.reason_map = x2.join(',');
 
                 console.log(param);
-
+                this.ord_loading(true);
                 if(this.props.edit){
-                    param._id = this.props.edit;
-                    await this.props.updateCVote(param);
-                    message.success('update success');
-                    this.props.history.push('/cvote/list');
+                    try{
+                        param._id = this.props.edit;
+                        await this.props.updateCVote(param);
+                        message.success('update success');
+                        this.ord_loading(false);
+                        this.props.history.push('/cvote/list');
+                    }catch(e){
+                        message.error(e.message);
+                        this.ord_loading(false);
+                    }
+                    
                 }
                 else{
-                    await this.props.createCVote(param);
-                    message.success('create success');
-                    this.props.history.push('/cvote/list');
+                    try{
+                        await this.props.createCVote(param);
+                        message.success('create success');
+                        this.ord_loading(false);
+                        this.props.history.push('/cvote/list');
+                    }catch(e){
+                        message.error(e.message);
+                        this.ord_loading(false);
+                    }
+                    
                 }
-
                 
             }
         })
@@ -329,7 +347,7 @@ class C extends BaseComponent {
         else{
             return (
                 <FormItem>
-                    <Button loading={this.props.loading} size="large" type="ebp" htmlType="submit" className="d_btn">
+                    <Button loading={this.state.loading} size="large" type="ebp" htmlType="submit" className="d_btn">
                         {edit ? 'Save' : 'Submit'}
                     </Button>
                 </FormItem>
@@ -347,7 +365,7 @@ class C extends BaseComponent {
         let en = 0;
         let an = 0;
         let status = 'process';
-        let ss = 'processing...';
+        let ss = data.status || 'processing...';
         _.each(s.voter, (item)=>{
             const name = item.value;
             if(data.vote_map[name] === 'support'){
@@ -365,14 +383,13 @@ class C extends BaseComponent {
         }
         else if(en > 1){
             status = 'error';
-            ss = 'not pass'
+            // ss = 'not pass'
         }
         
         if(n > 1){
             status = 'finish';
-            ss = 'pass'
-        }
-     console.log(n, en, an)   
+            // ss = 'pass'
+        } 
 
         const sy = {
             a : {

@@ -46,6 +46,7 @@ export default createContainer(Component, (state) => {
                 data : param
             });
             return rs;
+            
         }
     }
 })

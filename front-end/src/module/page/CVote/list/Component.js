@@ -12,7 +12,8 @@ export default class extends StandardPage {
     constructor(p){
         super(p);
 
-        this.state.list = [];
+        this.state.list = null;
+        this.state.loading = true;
     }
 
     ord_renderContent () {
@@ -25,9 +26,9 @@ export default class extends StandardPage {
         const columns = [
         {
             title: 'No.',
-            dataIndex: '_id',
-            render: (id, item, index) => {
-                return (<a className="tableLink" onClick={this.toDetail.bind(this, item._id)}>{index + 1}</a>)
+            dataIndex: 'vid',
+            render: (vid, item, index) => {
+                return (<a className="tableLink" onClick={this.toDetail.bind(this, item._id)}>#{vid}</a>)
             }
         },
         {
@@ -43,6 +44,11 @@ export default class extends StandardPage {
             render: (type, item) => {
                 return map[type];
             }
+        },
+
+        {
+            title : 'Author',
+            dataIndex : 'proposedBy'
         },
 
         {
@@ -64,6 +70,12 @@ export default class extends StandardPage {
             // dataIndex : '_id',
             render: (id, item)=>{
                 return this.voteDataByUser('Yipeng Su', item);
+            }
+        },
+        {
+            title : 'Status',
+            render: (id, item)=>{
+                return item.status || ''
             }
         },
 
@@ -92,9 +104,9 @@ export default class extends StandardPage {
                     </Row>
                     <Table
                         columns={columns}
+                        loading={this.state.loading}
                         dataSource={this.state.list}
                         rowKey={record => record._id}
-                        loading={this.props.loading}
                     />
                 </div>
             </div>
@@ -112,11 +124,13 @@ export default class extends StandardPage {
     async componentDidMount(){
         super.componentDidMount();
 
+        this.ord_loading(true);
+
         const list = await this.props.listData({});
       
         this.setState({list});
       
-        
+        this.ord_loading();
       
     }
 

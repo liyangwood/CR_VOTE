@@ -12,6 +12,7 @@ export default class extends BasePage {
         super(props)
 
         this.state = {
+            loading : false,
             showMobile: false
         }
     }
@@ -68,5 +69,9 @@ export default class extends BasePage {
 
     ord_renderContent() {
         return null;
+    }
+
+    ord_loading(f=false){
+        this.setState({loading : f});
     }
 }

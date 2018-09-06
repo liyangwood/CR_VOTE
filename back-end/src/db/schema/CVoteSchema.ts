@@ -5,6 +5,10 @@ export const CVote = {
         type : String,
         required : true
     },
+    vid : {
+        type : Number,
+        required : true
+    },
     type : {
         type : String,
         required : true
@@ -29,6 +33,9 @@ export const CVote = {
     vote_map : Object,
     reason_map : Object,
     createdBy : {
+        type : String
+    },
+    status : {
         type : String
     }
 };
