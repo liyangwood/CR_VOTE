@@ -6,8 +6,10 @@ import {message} from 'antd'
 
 
 export default createContainer(Component, (state) => {
+    
     return {
         user : state.user,
+        isLogin : state.user.is_login,
         static : {
             voter : [
                 {value : 'Yipeng Su'},

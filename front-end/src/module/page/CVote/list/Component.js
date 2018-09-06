@@ -23,13 +23,13 @@ export default class extends StandardPage {
         };
 
         const columns = [
-        // {
-        //     title: 'No.',
-        //     dataIndex: '_id',
-        //     render: (id, item, index) => {
-        //         return (<a className="tableLink">{index + 1}</a>)
-        //     }
-        // },
+        {
+            title: 'No.',
+            dataIndex: '_id',
+            render: (id, item, index) => {
+                return (<a className="tableLink" onClick={this.toDetail.bind(this, item._id)}>{index + 1}</a>)
+            }
+        },
         {
             title : 'Title',
             dataIndex : 'title',
@@ -44,22 +44,33 @@ export default class extends StandardPage {
                 return map[type];
             }
         },
+
         {
-            title : 'Author',
-            dataIndex : 'createdBy',
-            render : (item, data)=>{
-                return item || '';
+            title : 'Vote by Kevin Zhang',
+            // dataIndex : '_id',
+            render: (id, item)=>{
+                return this.voteDataByUser('Kevin Zhang', item);
             }
         },
+        {
+            title : 'Vote by Fay Li',
+            // dataIndex : '_id',
+            render: (id, item)=>{
+                return this.voteDataByUser('Fay Li', item);
+            }
+        },
+        {
+            title : 'Vote by Yipeng Su',
+            // dataIndex : '_id',
+            render: (id, item)=>{
+                return this.voteDataByUser('Yipeng Su', item);
+            }
+        },
+
         {
             title : 'Create Time',
             dataIndex : 'createdAt',
             render: (createdAt) => moment(createdAt).format('MMM D'),
-        },
-        {
-            title : 'Update Time',
-            dataIndex : 'updatedAt',
-            render: (updatedAt) => moment(updatedAt).format('MMM D'),
         }
         ]
 
@@ -100,22 +111,27 @@ export default class extends StandardPage {
 
     async componentDidMount(){
         super.componentDidMount();
+
+        const list = await this.props.listData({});
       
-        if(this.props.isLogin){
-            const list = await this.props.listData({});
+        this.setState({list});
       
-            this.setState({list});
-        }
-        else{
-            // this.props.history.replace('/login');
-        }
+        
       
     }
 
     ord_checkLogin(isLogin){
-        console.log(isLogin)
-        if(!isLogin){
-            this.props.history.replace('/login');
+        
+    }
+
+    voteDataByUser(u, data){
+        const map = data.vote_map;
+        if(!map[u]){
+            return '';
         }
+        const temp = map[u];
+        if(temp === 'support') return 'Y';
+        if(temp === 'reject') return 'N';
+        return '';
     }
 }

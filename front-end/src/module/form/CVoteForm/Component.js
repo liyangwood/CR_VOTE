@@ -1,13 +1,14 @@
 import React from 'react'
 import BaseComponent from '@/model/BaseComponent'
-import {Form, Icon, Input, Button, Checkbox, Select, Row, Col, message} from 'antd'
+import {Form, Icon, Input, Button, Checkbox, Select, Row, Col, message, Steps} from 'antd'
 import I18N from '@/I18N'
 import _ from 'lodash';
 
 import './style.scss'
 
 const FormItem = Form.Item;
-const TextArea = Input.TextArea
+const TextArea = Input.TextArea;
+const Step = Steps.Step;
 
 class C extends BaseComponent {
 
@@ -17,6 +18,9 @@ class C extends BaseComponent {
         this.state = {
             persist: true
         }
+
+        this.isLogin = this.props.isLogin;
+        this.user = this.props.user;
     }
 
     async handleSubmit(e) {
@@ -68,9 +72,18 @@ class C extends BaseComponent {
     getInputProps(data) {
         const edit = this.props.edit;
         const isAdmin = this.props.user.role === 'ADMIN';
+
+        const fullName = this.user.profile.firstName + ' ' + this.user.profile.lastName;
+
         const dis = {};
+        const dis1 = {};
         if(!isAdmin){
             dis.disabled = true;
+        }
+        else{
+            if(edit && data.createdBy !== this.user.current_user_id){
+                dis1.disabled = true;
+            }
         }
 
         const s = this.props.static;
@@ -81,7 +94,7 @@ class C extends BaseComponent {
             initialValue: edit ? parseInt(data.type, 10) : ''
         })
         const type_el = (
-            <Select size="large" {...dis}>
+            <Select size="large" {...dis} {...dis1}>
                 {/* <Select.Option key={-1} value={-1}>please select type</Select.Option> */}
                 {
                     _.map(s.select_type, (item, i)=>{
@@ -98,7 +111,7 @@ class C extends BaseComponent {
             initialValue : edit ? data.title : ''
         });
         const title_el = (
-            <Input {...dis} size="large" type="text" />
+            <Input {...dis} {...dis1} size="large" type="text" />
         );
 
         const content_fn = getFieldDecorator('content', {
@@ -106,16 +119,16 @@ class C extends BaseComponent {
             initialValue : edit ? data.content : ''
         });
         const content_el = (
-            <TextArea {...dis} rows={6}></TextArea>
+            <TextArea {...dis} {...dis1} rows={6}></TextArea>
         );
 
         const proposedBy_fn = getFieldDecorator('proposedBy', {
             rules : [{required : true}],
-            initialValue : edit ? data.proposedBy : -1
+            initialValue : edit ? data.proposedBy : fullName
         });
         const proposedBy_el = (
-            <Select {...dis} size="large">
-                <Select.Option key={-1} value={-1}>please select</Select.Option>
+            <Select {...dis} {...dis1} size="large">
+                {/* <Select.Option key={-1} value={-1}>please select</Select.Option> */}
                 {
                     _.map(s.voter, (item, i)=>{
                         return (
@@ -130,20 +143,24 @@ class C extends BaseComponent {
             initialValue : edit ? data.motionId : ''
         });
         const motionId_el = (
-            <Input {...dis} size="large" type="text" />
+            <Input {...dis} {...dis1} size="large" type="text" />
         );
 
         const vtt = {};
         _.each(s.voter, (item)=>{
             const name = item.value;
 
+            let tmp = {};
+            if(edit && fullName !== name && data.createdBy !== this.user.current_user_id){
+                tmp.disabled = true;
+            }
             
             const fn = getFieldDecorator('vote_'+name, {
-                initialValue : edit ? data.vote_map[name] : -1
+                initialValue : edit ? data.vote_map[name] : (fullName !== name ? '-1' : 'support')
             });
             const el = (
-                <Select {...dis} size="large">
-                    <Select.Option key={-1} value={-1}>please select</Select.Option>
+                <Select {...dis} {...tmp} size="large">
+                    <Select.Option key={'-1'} value={'-1'}>please select</Select.Option>
                     {
                         _.map(s.select_vote, (item, i)=>{
                             return (
@@ -160,11 +177,33 @@ class C extends BaseComponent {
         _.each(s.voter, (item)=>{
             const name = item.value;
 
+            let tmp = {};
+            if(edit && fullName !== name && data.createdBy !== this.user.current_user_id){
+                tmp.disabled = true;
+            }
+
             const fn = getFieldDecorator('reason_'+name, {
-                initialValue : edit ? data.reason_map[name] : ''
+                initialValue : edit ? data.reason_map[name] : '',
+                rules : [
+                    {},
+                    {
+                        validator : (rule, value, callback)=>{
+                            const form = this.props.form;
+                            const tmp = form.getFieldValue('vote_'+name);
+                            if(tmp === 'reject' && !value){
+                                callback('please input your reject reason');
+                            }
+                            else{
+                                callback();
+                            }
+                            
+                        }
+                    }
+                ]
+                
             });
             const el = (
-                <TextArea {...dis} rows={4}></TextArea>
+                <TextArea {...dis} {...tmp} rows={4}></TextArea>
             );
             vts['reason_'+name] = fn(el);
         });
@@ -173,7 +212,7 @@ class C extends BaseComponent {
             initialValue : edit ? data.isConflict : 'NO'
         });
         const isConflict_el = (
-            <Select {...dis} size="large">
+            <Select {...dis} {...dis1} size="large">
                 <Select.Option value={'NO'}>NO</Select.Option>
                 <Select.Option value={'YES'}>YES</Select.Option>
             </Select>
@@ -183,7 +222,7 @@ class C extends BaseComponent {
             initialValue : edit ? data.notes : ''
         });
         const notes_el = (
-            <TextArea rows={4}></TextArea>
+            <TextArea {...dis1} rows={4}></TextArea>
         );
 
         return {
@@ -235,8 +274,14 @@ class C extends BaseComponent {
                     Cyber Republic Council members can use this form to propose motion. All Cyber Republic citizen can view and share their own idea (offline). All proposals will be discussed in regular council meetings. All results will be disclosed to the public. This is a temporary solution before our Cyber Republic website has such a feature.
                 </h5>
 
-                <FormItem style={{marginTop: '24px'}} label="Type" {...formItemLayout}>{p.type}</FormItem>
-                <FormItem label="Title" {...formItemLayout}>{p.title}</FormItem>
+                <Row>
+                    <Col offset={6} span={12}>
+                        {this.renderVoteStep(this.props.data)}
+                    </Col>
+                </Row>
+                <FormItem style={{marginTop: '24px'}} label="Title" {...formItemLayout}>{p.title}</FormItem>
+                <FormItem label="Type" {...formItemLayout}>{p.type}</FormItem>
+                
                 <FormItem label="Content" {...formItemLayout}>{p.content}</FormItem>
                 <FormItem label="Proposed by" {...formItemLayout}>{p.proposedBy}</FormItem>
 
@@ -265,17 +310,117 @@ class C extends BaseComponent {
                 
                 <Row>
                     <Col offset={6} span={12}>
-                        <FormItem>
-                            <Button loading={this.props.loading} size="large" type="ebp" htmlType="submit" className="d_btn">
-                                Submit
-                            </Button>
-                        </FormItem>
+                        {this.renderSubmitButton()}
                     </Col>
                 </Row>
                 
                 
             </Form>
         )
+    }
+
+    renderSubmitButton(){
+        const edit = this.props.edit;
+        if(!this.isLogin){
+            return (
+                <h4 style={{color:'#f00'}}>Only Council Member could create or edit proposal.</h4>
+            );
+        }
+        else{
+            return (
+                <FormItem>
+                    <Button loading={this.props.loading} size="large" type="ebp" htmlType="submit" className="d_btn">
+                        {edit ? 'Save' : 'Submit'}
+                    </Button>
+                </FormItem>
+            )
+        }
+    }
+
+    renderVoteStep(data){
+        if(!this.props.edit){
+            return null;
+        }
+
+        const s = this.props.static;
+        let n = 0;
+        let en = 0;
+        let an = 0;
+        let status = 'process';
+        let ss = 'processing...';
+        _.each(s.voter, (item)=>{
+            const name = item.value;
+            if(data.vote_map[name] === 'support'){
+                n++;
+            }
+            else if(data.vote_map[name] === 'reject'){
+                en++;
+            }
+            else{
+                an++;
+            }
+        });
+        if(an > 0){
+            
+        }
+        else if(en > 1){
+            status = 'error';
+            ss = 'not pass'
+        }
+        
+        if(n > 1){
+            status = 'finish';
+            ss = 'pass'
+        }
+     console.log(n, en, an)   
+
+        const sy = {
+            a : {
+                width : '100%',
+                border : '1px solid #cdd',
+                height : 32,
+                flex : 1,
+                display : 'flex',
+                background : '#eee'
+            },
+            b : {
+                flex : 1,
+                display : 'flex',
+                borderRight : '1px solid #ccc'
+            }
+        };
+        const fn = (step)=>{
+            const xx = step - n;
+            if(n>=step){
+                return {
+                    background : 'green'
+                }
+            }
+            else if(en >= xx){
+                return {
+                    background : '#f5222d'
+                }
+            }
+        };
+        sy.a1 = _.extend(fn(1), sy.b);
+        sy.a2 = _.extend(fn(2), sy.b);
+        sy.a3 = _.extend(fn(3), sy.b);
+        return (
+            <div>
+                <h4 style={{paddingBottom:'5px'}}>vote status : {ss}</h4>
+                <div style={sy.a}>
+                    <div style={sy.a1}></div>
+                    <div style={sy.a2}></div>
+                    <div style={sy.a3}></div>
+                </div>
+                {/* <Steps current={status==='error'?en-1 : n-1} status={status}>
+                    <Step title="" />
+                    <Step title="" />
+                    <Step title="" />
+                </Steps> */}
+            </div>
+            
+        );
     }
 }
 

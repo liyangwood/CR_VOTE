@@ -97,6 +97,9 @@ export default class extends BaseComponent {
                 {this.props.isLogin && <Menu.Item style={{borderBottom:'1px solid #ccc'}} key="no_click">
                     {fullName}
                 </Menu.Item>}
+                {!this.props.isLogin && <Menu.Item style={{borderBottom:'1px solid #ccc'}} key="login">
+                    Login
+                </Menu.Item>}
                 
                 <Menu.Item key="help">
                     {I18N.get('0007')}
@@ -273,6 +276,7 @@ export default class extends BaseComponent {
             'faq',
             'contact',
             'slack',
+            'login',
             'user/reset-password'
         ], key)) {
 
