@@ -4,6 +4,7 @@ import create from './create';
 import list from './list';
 import get from './get';
 import update from './update';
+import finish from './finish';
 
 export default Base.setRouter([
     {
@@ -25,5 +26,10 @@ export default Base.setRouter([
         path : '/update',
         router : update,
         method : 'post'
+    },
+    {
+        path : '/finish',
+        router : finish,
+        method : 'get'
     }
 ]);

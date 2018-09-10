@@ -22,7 +22,7 @@ export default {
         })
 
         const data:any = {
-            from: 'Cyber Republic - Elastos <no-reply@elastosjs.com>',
+            from: 'Cyber Republic - CVOTE <no-reply@elastosjs.com>',
             to: `${toName} <${to}>`,
             subject: subject,
             html: body

@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 
-const create = (constant_list: [string]): any => {
+const create = (constant_list: string[]): any => {
     const map = {};
     _.each(constant_list, (key)=>{
         map[key] = key;
@@ -13,7 +13,8 @@ export const USER_ROLE = {
     MEMBER : 'MEMBER',
     LEADER : 'LEADER',
     ADMIN : 'ADMIN',
-    COUNCIL: 'COUNCIL'
+    COUNCIL: 'COUNCIL',
+    SECRETARY: 'SECRETARY'
 };
 
 export const USER_LANGUAGE = {
@@ -115,7 +116,7 @@ export const TEAM_TASK_DOMAIN = create([
     'SOVEREIGNTY',
     'SOCIAL',
     'EXCHANGE'
-])
+]);
 
 export const TEAM_ROLE = create(['MEMBER', 'LEADER']);
 export const TEAM_USER_STATUS = create(['NORMAL', 'PENDING', 'REJECT']);
@@ -124,3 +125,6 @@ export const TEAM_TYPE = create(['DEVELOP', 'MARKET', 'DESIGN', 'PROJECT', 'OTHE
 export const TASK_CANDIDATE_CATEGORY = {
     RSVP: 'RSVP'
 }
+
+export const CVOTE_STATUS = create(['DRAFT', 'PROPOSED', 'ACTIVE', 'REJECT', 'FINAL', 'DEFERRED']);
+export const CVOTE_EXPIRATION = 1000*60*60*48;

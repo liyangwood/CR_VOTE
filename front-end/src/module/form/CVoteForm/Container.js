@@ -46,7 +46,14 @@ export default createContainer(Component, (state) => {
                 data : param
             });
             return rs;
-            
+        },
+        async finishCVote(param){
+            const rs = await api_request({
+                path : '/api/cvote/finish',
+                method : 'get',
+                data : param
+            });
+            return rs;
         }
     }
 })

@@ -9,10 +9,14 @@ import store from '@/store';
 import config from '@/config';
 import {USER_ROLE} from '@/constant'
 import {api_request} from "./util";
+import moment from 'moment';
+
 
 import './boot';
 import './style/index.scss';
 import './style/mobile.scss';
+
+global.moment = moment;
 
 const middleware = (render, props)=>{
 	return render;

@@ -82,7 +82,7 @@ export default class extends StandardPage {
         {
             title : 'Create Time',
             dataIndex : 'createdAt',
-            render: (createdAt) => moment(createdAt).format('MMM D'),
+            render: (createdAt) => moment(createdAt).format('MM/DD/YYYY hh:mm'),
         }
         ]
 

@@ -4,8 +4,11 @@ import * as _ from 'lodash';
 import {constant} from '../constant';
 import * as uuid from 'uuid'
 import {validate, utilCrypto, mail} from '../utility';
+import * as moment from 'moment';
 
 const map_key = ['Kevin Zhang', 'Fay Li', 'Yipeng Su'];
+
+let tm = null;
 
 export default class extends Base {
 
@@ -35,9 +38,12 @@ export default class extends Base {
 
         const vid = await this.getNewVid();
         doc.vid = vid;
-        doc.status = this.getNewStatus(doc.vote_map);
+        doc.status = this.getNewStatus(doc.vote_map, null);
 
         const cvote = await db_cvote.save(doc);
+
+        this.sendEmailNotification(cvote, 'create');
+
         return cvote;
     }
 
@@ -47,7 +53,7 @@ export default class extends Base {
 
         const query = {};
         const list = await db_cvote.list(query, {
-            updatedAt: -1
+            createdAt: -1
         }, 100);
         
         for(let item of list){
@@ -71,8 +77,9 @@ export default class extends Base {
         if(!cur){
             throw 'invalid proposal id';
         }
-        if(cur.status === 'success' || cur.status === 'fail'){
-            throw 'proposal finished, can not edit anymore';
+
+        if(this.isExpired(cur) || _.includes([constant.CVOTE_STATUS.FINAL, constant.CVOTE_STATUS.DEFERRED], cur.status)){
+            throw 'proposal finished or deferred, can not edit anymore';
         }
 
         const {
@@ -90,12 +97,34 @@ export default class extends Base {
             reason_map : this.param_metadata(reason_map)
         };
 
-        doc.status = this.getNewStatus(doc.vote_map);
+        doc.status = this.getNewStatus(doc.vote_map, cur);
 
         const cvote = await db_cvote.update({_id : param._id}, doc);
+
+        this.sendEmailNotification({_id : param._id}, 'update');
         
         return cvote;
     }
+
+    public async finishById(id): Promise<any>{
+        const db_cvote = this.getDBModel('CVote');
+        const cur = await db_cvote.findOne({_id : id});
+        if(!cur){
+            throw 'invalid proposal id';
+        }
+        if(_.includes([constant.CVOTE_STATUS.FINAL], cur.status)){
+            throw 'proposal already completed.';
+        }
+
+        const rs = await db_cvote.update({_id : id}, {
+            $set : {
+                status : constant.CVOTE_STATUS.FINAL
+            }
+        })
+
+        return rs;
+    }
+
     public async getById(id): Promise<any>{
         const db_cvote = this.getDBModel('CVote');
         const rs = await db_cvote.findOne({_id : id});
@@ -123,8 +152,8 @@ export default class extends Base {
         return n+1;
     }
 
-    public getNewStatus(vote_map){
-        let rs = '';
+    public getNewStatus(vote_map, data){
+        let rs = constant.CVOTE_STATUS.PROPOSED;
         let ns = 0;
         let nf = 0;
         _.each(vote_map, (v)=>{
@@ -135,14 +164,86 @@ export default class extends Base {
                 nf++;
             }
         });
+
+        if(data && this.isExpired(data)){
+            return constant.CVOTE_STATUS.DEFERRED;
+        }
+
         if(nf > 1){
-            rs = 'fail';
+            rs = constant.CVOTE_STATUS.REJECT;
         }
         if(ns > 1){
-            rs = 'success';
+            rs = constant.CVOTE_STATUS.ACTIVE;
         }
+        
 
         return rs;
     }
 
+    public isExpired(data): Boolean{
+        const ct = moment(data.createdAt).valueOf();
+        if(Date.now() - ct > constant.CVOTE_EXPIRATION){
+            return true;
+        }
+        return false;
+    }
+
+
+
+    public async sendEmailNotification(data, updateOrCreate){
+        // const list = [
+        //     'kevinzhang@elastos.org',
+        //     'suyipeng@elastos.org',
+        //     'fay@elastos.org',
+        //     'zhufeng@elastos.org'
+        // ];
+
+        // _.each(['liyangwood@aliyun.com'], async (address)=>{
+        //     await mail.send({
+        //         to : address,
+        //         toName : 'Jacky.li',
+        //         subject : 'CVote - Notification',
+        //         body : `
+        //             Proposal ${updateOrCreate}
+        //             <br />
+        //             please alick this link to get details.
+        //             <a href="${process.env.SERVER_URL}/cvote/edit/${data._id}">${process.env.SERVER_URL}/cvote/edit/${data._id}</a>
+        //         `
+        //     });
+        // });
+    }
+
+    private async eachJob(){
+        const db_cvote = this.getDBModel('CVote');
+
+        const list = await db_cvote.find({
+            'status' : {
+                '$in' : [constant.CVOTE_STATUS.PROPOSED]
+            }
+        });
+        const ids = [];
+        console.log(ids);
+        _.each(list, (item)=>{
+            if(this.isExpired(item)){
+                ids.push(item._id);
+            }
+        });
+
+        await db_cvote.update({_id : {
+            $in : ids
+        }}, {
+            status : constant.CVOTE_STATUS.DEFERRED
+        });
+
+    }
+
+    public cronjob(){
+        if(tm){
+            return false;
+        }
+        tm = setInterval(()=>{
+            console.log('---------------- start cvote cronjob -------------');
+            this.eachJob();
+        }, 1000*60);
+    }
 }

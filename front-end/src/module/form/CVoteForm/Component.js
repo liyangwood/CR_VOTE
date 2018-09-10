@@ -1,6 +1,6 @@
 import React from 'react'
 import BaseComponent from '@/model/BaseComponent'
-import {Form, Icon, Input, Button, Checkbox, Select, Row, Col, message, Steps} from 'antd'
+import {Form, Icon, Input, Button, Checkbox, Select, Row, Col, message, Steps, Modal} from 'antd'
 import I18N from '@/I18N'
 import _ from 'lodash';
 
@@ -89,7 +89,8 @@ class C extends BaseComponent {
 
     getInputProps(data) {
         const edit = this.props.edit;
-        const isAdmin = this.props.user.role === 'ADMIN';
+        const role = this.props.user.role;
+        const isAdmin = role === 'ADMIN';
 
         const fullName = this.user.profile.firstName + ' ' + this.user.profile.lastName;
 
@@ -329,6 +330,7 @@ class C extends BaseComponent {
                 <Row>
                     <Col offset={6} span={12}>
                         {this.renderSubmitButton()}
+                        {this.renderFinishButton()}
                     </Col>
                 </Row>
                 
@@ -339,7 +341,8 @@ class C extends BaseComponent {
 
     renderSubmitButton(){
         const edit = this.props.edit;
-        if(!this.isLogin){
+        const role = this.props.user.role;
+        if(!this.isLogin || !_.includes(['ADMIN', 'SECRETARY'], role)){
             return (
                 <h4 style={{color:'#f00'}}>Only Council Member could create or edit proposal.</h4>
             );
@@ -353,6 +356,43 @@ class C extends BaseComponent {
                 </FormItem>
             )
         }
+    }
+    renderFinishButton(){
+        const edit = this.props.edit;
+        const role = this.props.user.role;
+        const data = this.props.data;
+        if(edit && this.isLogin && role === 'SECRETARY'){
+            return (
+                <FormItem style={{marginTop:40}}>
+                    <Button loading={this.state.loading} onClick={this.finishClick.bind(this, data._id)} size="large" type="ebp" className="d_btn">
+                        Complete this proposal
+                    </Button>
+                </FormItem>
+            );
+        }
+        return null;
+    }
+    finishClick(id){
+        Modal.confirm({
+            title: 'Are you sure to complete this proposal?',
+            content: '',
+            okText: 'Confirm',
+            okType: 'danger',
+            cancelText: 'Cancel',
+            onOk: ()=>{
+                this.ord_loading(true);
+                this.props.finishCVote({
+                    id : id
+                }).then(()=>{
+                    this.ord_loading(false);
+                }).catch((e)=>{
+                    message.error(e.message);
+                    this.ord_loading(false);
+                })
+            },
+            onCancel(){
+            }
+        })
     }
 
     renderVoteStep(data){
