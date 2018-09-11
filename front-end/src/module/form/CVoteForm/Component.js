@@ -90,7 +90,7 @@ class C extends BaseComponent {
     getInputProps(data) {
         const edit = this.props.edit;
         const role = this.props.user.role;
-        const isAdmin = role === 'ADMIN';
+        const isAdmin = (role === 'ADMIN' || role === 'SECRETARY');
 
         const fullName = this.user.profile.firstName + ' ' + this.user.profile.lastName;
 
