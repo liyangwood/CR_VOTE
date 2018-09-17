@@ -15,7 +15,7 @@ export default class extends StandardPage {
                 <div className="d_box">
                     <div style={{textAlign:'left'}}>
                         <Breadcrumb>
-                            <Breadcrumb.Item href="/">
+                            <Breadcrumb.Item onClick={this.goList.bind(this)} href="javascript:void(0)">
                                 <Icon type="home" />
                             </Breadcrumb.Item>
                             <Breadcrumb.Item>edit proposal</Breadcrumb.Item>
@@ -36,5 +36,9 @@ export default class extends StandardPage {
   
         const data = await this.props.getData(this.props.match.params.id);
         this.setState({data});
+    }
+
+    goList(){
+        this.props.history.push('/cvote/list');
     }
 }

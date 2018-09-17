@@ -12,11 +12,12 @@ export default class extends StandardPage {
                 <div className="d_box">
                     <div style={{textAlign:'left'}}>
                         <Breadcrumb>
-                            <Breadcrumb.Item href="/">
+                            <Breadcrumb.Item onClick={this.goList.bind(this)} href="javascript:void(0)">
                                 <Icon type="home" />
                             </Breadcrumb.Item>
                             <Breadcrumb.Item>create proposal</Breadcrumb.Item>
                         </Breadcrumb>
+
                     </div>
                     <CVoteForm />
                 </div>
@@ -29,4 +30,9 @@ export default class extends StandardPage {
             this.props.history.replace('/login');
         }
     }
+
+    goList(){
+        this.props.history.push('/cvote/list');
+    }
+
 }

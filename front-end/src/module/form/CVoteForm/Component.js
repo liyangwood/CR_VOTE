@@ -96,6 +96,7 @@ class C extends BaseComponent {
 
         const dis = {};
         const dis1 = {};
+        const dis2 = {};
         if(!isAdmin){
             dis.disabled = true;
         }
@@ -104,6 +105,9 @@ class C extends BaseComponent {
                 dis1.disabled = true;
             }
         }
+
+    
+        
 
         const s = this.props.static;
         const {getFieldDecorator} = this.props.form;
@@ -241,7 +245,7 @@ class C extends BaseComponent {
             initialValue : edit ? data.notes : ''
         });
         const notes_el = (
-            <TextArea {...dis1} rows={4}></TextArea>
+            <TextArea {...dis} rows={4}></TextArea>
         );
 
         return {
@@ -384,7 +388,9 @@ class C extends BaseComponent {
                 this.props.finishCVote({
                     id : id
                 }).then(()=>{
+                    message.success('complete proposal success!');
                     this.ord_loading(false);
+                    this.props.history.push('/cvote/list');
                 }).catch((e)=>{
                     message.error(e.message);
                     this.ord_loading(false);
