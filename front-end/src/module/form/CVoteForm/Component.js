@@ -101,7 +101,7 @@ class C extends BaseComponent {
             dis.disabled = true;
         }
         else{
-            if(edit && data.createdBy !== this.user.current_user_id){
+            if(edit && (data.createdBy !== this.user.current_user_id || _.includes(['FINAL', 'DEFERRED'], data.status))){
                 dis1.disabled = true;
             }
         }
@@ -174,7 +174,8 @@ class C extends BaseComponent {
             const name = item.value;
 
             let tmp = {};
-            if(edit && fullName !== name && data.createdBy !== this.user.current_user_id){
+            // if(edit && fullName !== name && data.createdBy !== this.user.current_user_id){
+            if(fullName !== name){
                 tmp.disabled = true;
             }
             
@@ -201,7 +202,8 @@ class C extends BaseComponent {
             const name = item.value;
 
             let tmp = {};
-            if(edit && fullName !== name && data.createdBy !== this.user.current_user_id){
+            // if(edit && fullName !== name && data.createdBy !== this.user.current_user_id){
+            if(fullName !== name){
                 tmp.disabled = true;
             }
 
@@ -335,6 +337,7 @@ class C extends BaseComponent {
                     <Col offset={6} span={12}>
                         {this.renderSubmitButton()}
                         {this.renderFinishButton()}
+                        {this.renderUpdateNoteButton()}
                     </Col>
                 </Row>
                 
@@ -343,13 +346,48 @@ class C extends BaseComponent {
         )
     }
 
+    renderUpdateNoteButton(){
+        const edit = this.props.edit;
+        const role = this.props.user.role;
+        const data = this.props.data;
+        if(edit && this.isLogin && role === 'SECRETARY' && _.includes(['FINAL', 'DEFERRED'], data.status)){
+            return (
+                <FormItem style={{marginTop:40}}>
+                    <Button loading={this.state.loading} onClick={this.updateNote.bind(this, data._id)} size="large" type="ebp" className="d_btn">
+                        Update Notes
+                    </Button>
+                </FormItem>
+            );
+        }
+        return null;
+    }
+
+    updateNote(id){
+        const notes = this.props.form.getFieldValue('notes');
+        this.ord_loading(true);
+        this.props.updateNotes({
+            _id : id,
+            notes
+        }).then(()=>{
+            message.success('update notes success!');
+            this.ord_loading(false);
+        }).catch((e)=>{
+            message.error(e.message);
+            this.ord_loading(false);
+        })
+    }
+
     renderSubmitButton(){
         const edit = this.props.edit;
         const role = this.props.user.role;
+        const data = this.props.data;
         if(!this.isLogin || !_.includes(['ADMIN', 'SECRETARY'], role)){
             return (
                 <h4 style={{color:'#f00'}}>Only Council Member could create or edit proposal.</h4>
             );
+        }
+        else if(this.isLogin && edit && _.includes(['FINAL', 'DEFERRED'], data.status)){
+            return null;
         }
         else{
             return (
@@ -365,7 +403,7 @@ class C extends BaseComponent {
         const edit = this.props.edit;
         const role = this.props.user.role;
         const data = this.props.data;
-        if(edit && this.isLogin && role === 'SECRETARY'){
+        if(edit && this.isLogin && role === 'SECRETARY' && data.status !== 'FINAL'){
             return (
                 <FormItem style={{marginTop:40}}>
                     <Button loading={this.state.loading} onClick={this.finishClick.bind(this, data._id)} size="large" type="ebp" className="d_btn">

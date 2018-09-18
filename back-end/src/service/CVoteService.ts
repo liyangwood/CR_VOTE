@@ -188,6 +188,25 @@ export default class extends Base {
         return false;
     }
 
+    public async updateNote(param): Promise<Document>{
+        const db_cvote = this.getDBModel('CVote');
+
+        const cur = await db_cvote.findOne({_id : param._id});
+        if(!cur){
+            throw 'invalid proposal id';
+        }
+        if(this.currentUser.role !== constant.USER_ROLE.SECRETARY){
+            throw 'only secretary could update notes';
+        }
+
+        const rs = await db_cvote.update({_id : param._id}, {
+            $set : {
+                notes : param.notes || ''
+            }
+        })
+
+        return rs;
+    }
 
 
     public async sendEmailNotification(data, updateOrCreate){

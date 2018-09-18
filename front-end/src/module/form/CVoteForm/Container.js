@@ -54,6 +54,14 @@ export default createContainer(Component, (state) => {
                 data : param
             });
             return rs;
+        },
+        async updateNotes(param){
+            const rs = await api_request({
+                path : '/api/cvote/update_notes',
+                method : 'post',
+                data : param
+            });
+            return rs;
         }
     }
 })
