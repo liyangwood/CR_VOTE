@@ -55,10 +55,13 @@ export default class extends Base {
         const list = await db_cvote.list(query, {
             createdAt: -1
         }, 100);
-        
+   
         for(let item of list){
             if(item.createdBy){
+                console.log(11, item.createdBy);
                 const u = await db_user.findOne({_id : item.createdBy});
+                
+                console.log(22, u)
                 item.createdBy = u.username;
             }
             
@@ -78,7 +81,7 @@ export default class extends Base {
             throw 'invalid proposal id';
         }
 
-        if(this.isExpired(cur) || _.includes([constant.CVOTE_STATUS.FINAL, constant.CVOTE_STATUS.DEFERRED], cur.status)){
+        if(this.isExpired(cur) || _.includes([constant.CVOTE_STATUS.FINAL, /*constant.CVOTE_STATUS.DEFERRED*/], cur.status)){
             throw 'proposal finished or deferred, can not edit anymore';
         }
 
@@ -182,9 +185,9 @@ export default class extends Base {
 
     public isExpired(data): Boolean{
         const ct = moment(data.createdAt).valueOf();
-        if(Date.now() - ct > constant.CVOTE_EXPIRATION){
-            return true;
-        }
+        // if(Date.now() - ct > constant.CVOTE_EXPIRATION){
+        //     return true;
+        // }
         return false;
     }
 

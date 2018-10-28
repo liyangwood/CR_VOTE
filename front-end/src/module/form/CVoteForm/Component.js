@@ -101,7 +101,7 @@ class C extends BaseComponent {
             dis.disabled = true;
         }
         else{
-            if(edit && (data.createdBy !== this.user.current_user_id || _.includes(['FINAL', 'DEFERRED'], data.status))){
+            if(edit && (data.createdBy !== this.user.current_user_id || _.includes(['FINAL', /*'DEFERRED'*/], data.status))){
                 dis1.disabled = true;
             }
         }
@@ -350,7 +350,7 @@ class C extends BaseComponent {
         const edit = this.props.edit;
         const role = this.props.user.role;
         const data = this.props.data;
-        if(edit && this.isLogin && role === 'SECRETARY' && _.includes(['FINAL', 'DEFERRED'], data.status)){
+        if(edit && this.isLogin && role === 'SECRETARY' && _.includes(['FINAL', /*'DEFERRED'*/], data.status)){
             return (
                 <FormItem style={{marginTop:40}}>
                     <Button loading={this.state.loading} onClick={this.updateNote.bind(this, data._id)} size="large" type="ebp" className="d_btn">
@@ -386,7 +386,7 @@ class C extends BaseComponent {
                 <h4 style={{color:'#f00'}}>Only Council Member could create or edit proposal.</h4>
             );
         }
-        else if(this.isLogin && edit && _.includes(['FINAL', 'DEFERRED'], data.status)){
+        else if(this.isLogin && edit && _.includes(['FINAL', /*'DEFERRED'*/], data.status)){
             return null;
         }
         else{
